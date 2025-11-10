@@ -2,7 +2,15 @@
 
 By Ichiro Wang and Ajax Mok
 
-Dataset source: [https://www.kaggle.com/datasets/beckettnewton/mlb-hitting-pitching-data-2015-2024](https://www.kaggle.com/datasets/beckettnewton/mlb-hitting-pitching-data-2015-2024)
+## Dataset
+- Source: [https://www.kaggle.com/datasets/beckettnewton/mlb-hitting-pitching-data-2015-2024](https://www.kaggle.com/datasets/beckettnewton/mlb-hitting-pitching-data-2015-2024)
+- Using batting data and ignoring pitching data
+
+### Number of Samples and Features
+- Samples: 14051
+- Features: 321
+    - Numerical: AVG, HR, OPS, wRC+, etc.
+    - Categorical: Name, Team.
 
 ## Installing packages
 
