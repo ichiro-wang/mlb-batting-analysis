@@ -26,6 +26,11 @@ class OutlierDetector:
         self.method = method
         self.contamination = contamination
 
+        self.y_pred = None # array where 1 is an inlier and -1 is an outlier
+        self.outliers_mask = None # array where True if outlier and False if inlier
+        self.num_outliers = None
+        self.rel_freq_outliers = None
+
         random_state = 42
         if method == "iso_forest":
             self.model = IsolationForest(
@@ -53,20 +58,38 @@ class OutlierDetector:
 
         :returns results: dictionary of various attributes
         """
-        y_pred = self.find_outliers(X)
-        outliers_mask = y_pred == -1
-        num_outliers = outliers_mask.sum()
-        rel_freq_outliers = num_outliers / len(X)
+        self.y_pred = self.find_outliers(X)
+        self.outliers_mask = self.y_pred == -1
+        self.num_outliers = self.outliers_mask.sum()
+        self.rel_freq_outliers = self.num_outliers / len(X)
 
-        outlier_data = reference_data[outliers_mask]
+        self.outlier_data = reference_data[self.outliers_mask]
 
         results = {
-            "y_pred": y_pred,
-            "outliers_mask": outliers_mask,
-            "num_outliers": num_outliers,
-            "rel_freq_outliers": rel_freq_outliers,
-            "outlier_data": outlier_data,
+            "y_pred": self.y_pred,
+            "outliers_mask": self.outliers_mask,
+            "num_outliers": self.num_outliers,
+            "rel_freq_outliers": self.rel_freq_outliers,
+            "outlier_data": self.outlier_data,
         }
-        
+
         return results
 
+    def outlier_summary(self, outlier_data: pd.DataFrame | None = None, n=10) -> None:
+        """
+        :param outlier_data: outlier data found during `analyze_outliers`
+        :returns None:
+        """
+        print("Summary of outliers")
+        print(f"Total number of samples: {len(self.y_pred)}")
+        print(
+            f"Number of outliers: {self.num_outliers}, Proportion of outliers: {self.rel_freq_outliers}"
+        )
+
+        if outlier_data is None:
+            outlier_data = self.outlier_data
+
+        top_outliers = outlier_data.nlargest(n=n, columns=["wRC+"])
+        bottom_outliers = outlier_data.nsmallest(n=n, columns=["wRC+"])
+        print(f"\nTop outliers:\n{top_outliers}")
+        print(f"\nBottom outliers:\n{bottom_outliers}")
