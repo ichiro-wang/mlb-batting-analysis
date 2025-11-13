@@ -62,7 +62,7 @@ def plot_heatmap(data: pd.DataFrame, key_stats: list[str]) -> None:
     print(f"Features with high correlation (>= +-{high_corr_threshold}):")
     high_corr.sort(reverse=True)
     for corr, feat1, feat2 in high_corr:
-        print(f"{feat1}, {feat2}: {corr}")
+        print(f"{feat1}, {feat2}: {corr:.4f}")
 
     plt.figure(figsize=(12, 10))
     plt.title("Correlation Heatmap of Key Statistics", pad=10)
