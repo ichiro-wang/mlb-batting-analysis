@@ -26,8 +26,8 @@ class OutlierDetector:
         self.method = method
         self.contamination = contamination
 
-        self.y_pred = None # array where 1 is an inlier and -1 is an outlier
-        self.outliers_mask = None # array where True if outlier and False if inlier
+        self.y_pred = None  # array where 1 is an inlier and -1 is an outlier
+        self.outliers_mask = None  # array where True if outlier and False if inlier
         self.num_outliers = None
         self.rel_freq_outliers = None
 

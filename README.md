@@ -15,7 +15,7 @@ By Ichiro Wang and Ajax Mok
 ## Installing packages
 
 ```bash
-poetry install
+poetry install --no-root
 poetry run ipython kernel install --name "mlb-batting-analysis-env" --user
 ```
 
