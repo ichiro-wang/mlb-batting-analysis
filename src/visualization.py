@@ -112,3 +112,31 @@ def plot_pca_by_tier(
     plt.legend()
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.show()
+
+
+def plot_outliers(pca_result: np.ndarray, y_pred: np.ndarray):
+    """
+    plotting outliers on a scatter plot
+    """
+    labels = {"inlier": 1, "outlier": -1}
+    colors = {"inlier": "blue", "outlier": "red"}
+
+    plt.figure(figsize=(10, 6))
+    for label, value in labels.items():
+        mask = y_pred == value
+        alpha = 1 if label == "outlier" else 0.6
+
+        plt.scatter(
+            pca_result[mask, 0],
+            pca_result[mask, 1],
+            label=label,
+            alpha=alpha,
+            edgecolors="k",
+            color=colors[label]
+        )
+    plt.xlabel("PC1")
+    plt.ylabel("PC2")
+    plt.title("PCA Visualization of Outliers")
+    plt.legend()
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.show()
