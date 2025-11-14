@@ -75,7 +75,7 @@ def plot_tier_distribution(data: pd.DataFrame, tier_order: list[str]) -> None:
     """
     after adding performance tiers to data, plot its distribution
     """
-    print(data["Performance Tier"].value_counts())
+    print(f"\n{data["Performance Tier"].value_counts()}")
 
     plt.figure(figsize=(10, 6))
     data["Performance Tier"].value_counts().reindex(tier_order).plot(kind="bar")
@@ -114,29 +114,31 @@ def plot_pca_by_tier(
     plt.show()
 
 
-def plot_outliers(pca_result: np.ndarray, y_pred: np.ndarray):
+def plot_outliers(pca_result: np.ndarray, y_pred: np.ndarray, contamination: float = None):
     """
     plotting outliers on a scatter plot
     """
     labels = {"inlier": 1, "outlier": -1}
     colors = {"inlier": "blue", "outlier": "red"}
 
-    plt.figure(figsize=(10, 6))
     for label, value in labels.items():
         mask = y_pred == value
         alpha = 1 if label == "outlier" else 0.6
-
         plt.scatter(
             pca_result[mask, 0],
             pca_result[mask, 1],
             label=label,
             alpha=alpha,
             edgecolors="k",
-            color=colors[label]
+            color=colors[label],
         )
+
     plt.xlabel("PC1")
     plt.ylabel("PC2")
-    plt.title("PCA Visualization of Outliers")
+    title = "PCA Visualization of Outliers"
+    if contamination is not None:
+        title += f" (contamination={contamination})"
+    plt.title(title)
     plt.legend()
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.show()

@@ -18,3 +18,16 @@ def detect_outliers_isolation_forest(
     iso_forest = IsolationForest(contamination=contamination, random_state=42)
     y_pred = iso_forest.fit_predict(X)
     return iso_forest, y_pred
+
+
+def analyze_outliers(outliers_data: pd.DataFrame) -> None:
+    """
+    provide some analysis on the outliers
+    """
+    print(f"Number of outliers: {len(outliers_data)}")
+
+    top_n = 10
+    print(f"\nTop {top_n} outliers by wRC+:")
+    print(outliers_data.nlargest(top_n, "wRC+"))
+    print(f"\nBottom {top_n} outliers by wRC+:")
+    print(outliers_data.nsmallest(top_n, "wRC+"))
