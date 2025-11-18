@@ -6,6 +6,7 @@ By Ichiro Wang and Ajax Mok.
 
 - Source: [https://www.kaggle.com/datasets/beckettnewton/mlb-hitting-pitching-data-2015-2024](https://www.kaggle.com/datasets/beckettnewton/mlb-hitting-pitching-data-2015-2024)
 - Using batting data and ignoring pitching data.
+- Check out the [FanGraphs Library](https://library.fangraphs.com/offense/offensive-statistics-list/) to learn more about the stats provided in the data.
 
 ### Number of Samples and Features
 
