@@ -1,3 +1,8 @@
+"""
+File: feature_selection.py
+Description: Apply feature selection algorithms on data
+"""
+
 import pandas as pd
 import numpy as np
 import warnings

@@ -1,3 +1,8 @@
+"""
+File: data_loader.py
+Description: Loads CSV files from data folder
+"""
+
 import pandas as pd
 
 

@@ -1,3 +1,8 @@
+"""
+File: preprocessing.py
+Description: Helper functions for preprocessing data
+"""
+
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
