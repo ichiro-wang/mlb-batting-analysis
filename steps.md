@@ -2,18 +2,21 @@
 
 1. Outlier Detection
 - Isolation Forest: highly dimensional data
-- LOF: finding outliers
+- Choose one more
 
 2. Feature Selection
+- Using domain knowledge
 - RFE
+- Choose one more
 
 3. Cluster Analysis
-- KMeans: fast, interpretable
-- DBSCAN: finds irregular-shape clusters
+- Some options
+  - KMeans: fast, interpretable
+  - DBSCAN: finds irregular-shape clusters
 
 4. Classification
-- Random Forest
-- XGBoost
+- Some options
+  - Random Forest
+  - XGBoost
 
 5. Hyperparameter Tuning
-- Tune whichever classifier performs best
