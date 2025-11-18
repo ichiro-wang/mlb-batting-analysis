@@ -1,3 +1,8 @@
+"""
+File: outlier_detection.py
+Description: Apply outlier detection algorithms on data
+"""
+
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import IsolationForest

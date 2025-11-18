@@ -1,3 +1,8 @@
+"""
+File: visualization.py
+Description: Helper functions for plotting and visualizing data
+"""
+
 import math
 import pandas as pd
 import numpy as np
