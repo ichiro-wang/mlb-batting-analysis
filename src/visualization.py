@@ -114,13 +114,16 @@ def plot_pca_by_tier(
     plt.show()
 
 
-def plot_outliers(pca_result: np.ndarray, y_pred: np.ndarray, contamination: float = None):
+def plot_outliers(
+    pca_result: np.ndarray, y_pred: np.ndarray, contamination: float = None
+):
     """
     plotting outliers on a scatter plot
     """
     labels = {"inlier": 1, "outlier": -1}
     colors = {"inlier": "blue", "outlier": "red"}
 
+    plt.figure(figsize=(10, 6))
     for label, value in labels.items():
         mask = y_pred == value
         alpha = 1 if label == "outlier" else 0.6

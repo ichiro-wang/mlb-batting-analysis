@@ -196,3 +196,10 @@ def apply_pca(numerical_data: pd.DataFrame) -> tuple[np.ndarray, PCA]:
     )
 
     return pca_result, pca
+
+
+def check_correlations(data: pd.DataFrame, features: list[str]) -> pd.DataFrame:
+    """
+    given a list of features, return their correlation matrix
+    """
+    return data[features].corr()
