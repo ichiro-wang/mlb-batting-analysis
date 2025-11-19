@@ -119,16 +119,17 @@ def manually_keep_stats(data: pd.DataFrame, X: pd.DataFrame) -> pd.DataFrame:
     pass
 
 
-def apply_rfecv(X_train: pd.DataFrame, y_train: pd.Series) -> RFECV:
+def apply_rfecv(
+    X_train: pd.DataFrame, y_train: pd.Series, n_splits: int = 5, step_size: int = 1
+) -> tuple[RFECV, np.ndarray[str]]:
     """
     apply recursive feature elimination with cross validation to find best features
     """
-    warnings.filterwarnings("ignore", message="pkg_resources is deprecated")
+    warnings.filterwarnings("ignore", message="deprecated")
 
     # use a stratified n_splits strategy
-    cv_split = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv_split = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
     rf = RandomForestClassifier(random_state=42)
-    step_size = 1
 
     rfecv = RFECV(
         estimator=rf,
@@ -139,25 +140,27 @@ def apply_rfecv(X_train: pd.DataFrame, y_train: pd.Series) -> RFECV:
     )
 
     rfecv.fit(X=X_train, y=y_train)
+    selected_features = rfecv.get_feature_names_out()
 
     print(f"Number of selected features: {rfecv.n_features_}")
-    print(f"Selected features: {rfecv.get_feature_names_out()}")
+    print(f"Selected features: {selected_features}")
 
-    return rfecv
+    return rfecv, selected_features
 
 
 def apply_lasso(
     X_train: pd.DataFrame,
     y_train: pd.Series,
-    Cs: np.ndarray = None,
-    cv: int = 5,
+    Cs: np.ndarray | None = None,
+    n_splits: int = 5,
     tol: float = 1e-4,
-) -> tuple[Pipeline, pd.Index]:
+) -> tuple[LogisticRegressionCV, np.ndarray[str]]:
     """
     L1-penalized Logistic Regression (LASSO-like) for classification feature selection.
     """
+    warnings.filterwarnings("ignore", message="deprecated")
 
-    cv_split = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
+    cv_split = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
     lrcv = LogisticRegressionCV(
         Cs=Cs,
@@ -176,7 +179,7 @@ def apply_lasso(
     coef_matrix = lrcv.coef_
     nonzero_mask = (np.abs(coef_matrix) > tol).any(axis=0)
 
-    selected_features = X_train.columns[nonzero_mask]
+    selected_features = X_train.columns[nonzero_mask].to_numpy()
     print(f"Number of selected features: {len(selected_features)}")
     print(f"Selected features: {selected_features.tolist()}")
 

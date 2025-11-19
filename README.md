@@ -21,6 +21,7 @@
 - [Dockerfile](./Dockerfile)
 - [poetry.lock](./poetry.lock)
 - [pyproject.toml](./pyproject.toml)
+- [requirements.txt](./requirements..txt)
 - [README.md](./README.md)
 
 ## Data Access Notes
