@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 
 
@@ -213,3 +212,20 @@ def check_correlations(data: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     given a list of features, return their correlation matrix
     """
     return data[features].corr()
+
+
+def convert_sb_cs_rate(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    instead of counting SB and CS, we convert it to a rate to check efficiency
+
+    SB% = SB / (SB + CS)
+
+    This approach aligns with the project's philosophy of using rate stats instead of counting stats
+    """
+    data = data.copy()
+
+    data["SB%"] = data["SB"] / (data["SB"] + data["CS"])
+    data["SB%"] = data["SB%"].fillna(0)
+    data = data.drop(columns=["SB", "CS"])
+
+    return data

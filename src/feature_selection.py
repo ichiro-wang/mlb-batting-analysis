@@ -12,7 +12,6 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegressionCV
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import classification_report
 
 
 def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
@@ -26,7 +25,7 @@ def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
     non_plus_stats = [base for base in base_names if base in data.columns]
 
     pitch_types = ["SL", "CT", "CB", "CH", "SF"]
-    other_pitch_stats = ["FB% (Pitch)", "FBv", "wFB", "wFB/C", "XX%"]
+    other_pitch_stats = ["FB% (Pitch)", "FBv", "wFB", "wFB/C", "XX%", "Pace"]
     for type in pitch_types:
         other_pitch_stats.extend([f"{type}%", f"{type}v", f"w{type}", f"w{type}/C"])
 
@@ -62,6 +61,11 @@ def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
             "GDP",
             "HardHit",
             "Barrels",
+            "IFFB",
+            "IFH",
+            "LD",
+            "BUH",
+            "BU",
         ],
         "value_stats": [
             "WAR",
@@ -77,6 +81,9 @@ def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
             "Off",
             "Def",
             "Lg",
+            "wSB",
+            "UBR",
+            "wGDP",
         ],
         "context_stats": [
             "WPA",
@@ -104,7 +111,11 @@ def manually_keep_stats(data: pd.DataFrame, X: pd.DataFrame) -> pd.DataFrame:
     """
     manually select some features to keep
     """
-    to_keep = ["Age", "Season", "Spd", ]
+    to_keep = [
+        "Age",
+        "Season",
+        "Spd",
+    ]
     pass
 
 
@@ -115,8 +126,7 @@ def apply_rfecv(X_train: pd.DataFrame, y_train: pd.Series) -> RFECV:
     warnings.filterwarnings("ignore", message="pkg_resources is deprecated")
 
     # use a stratified n_splits strategy
-    n_splits = 5
-    cv_split = StratifiedKFold(n_splits, shuffle=True, random_state=42)
+    cv_split = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     rf = RandomForestClassifier(random_state=42)
     step_size = 1
 
@@ -130,10 +140,11 @@ def apply_rfecv(X_train: pd.DataFrame, y_train: pd.Series) -> RFECV:
 
     rfecv.fit(X=X_train, y=y_train)
 
-    print(f"Optimal number of features: {rfecv.n_features_}")
-    print(f"Optimal features: {rfecv.get_feature_names_out()}")
+    print(f"Number of selected features: {rfecv.n_features_}")
+    print(f"Selected features: {rfecv.get_feature_names_out()}")
 
     return rfecv
+
 
 def apply_lasso(
     X_train: pd.DataFrame,
@@ -146,35 +157,27 @@ def apply_lasso(
     L1-penalized Logistic Regression (LASSO-like) for classification feature selection.
     """
 
-    pipe = Pipeline(
-        [
-            ("scaler", StandardScaler()),
-            (
-                "logregcv",
-                LogisticRegressionCV(
-                    Cs=Cs,
-                    cv=cv,
-                    penalty="l1",
-                    solver="saga",
-                    multi_class="ovr",
-                    scoring="accuracy",
-                    max_iter=5000,
-                    random_state=42,
-                    n_jobs=-1,
-                ),
-            ),
-        ]
+    cv_split = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
+
+    lrcv = LogisticRegressionCV(
+        Cs=Cs,
+        cv=cv_split,
+        penalty="l1",
+        solver="saga",
+        multi_class="ovr",
+        scoring="accuracy",
+        max_iter=5000,
+        random_state=42,
+        n_jobs=-1,
     )
 
-    pipe.fit(X_train, y_train)
-    model = pipe.named_steps["logregcv"]
+    lrcv.fit(X_train, y_train)
 
-    coef_matrix = model.coef_
+    coef_matrix = lrcv.coef_
     nonzero_mask = (np.abs(coef_matrix) > tol).any(axis=0)
 
     selected_features = X_train.columns[nonzero_mask]
     print(f"Number of selected features: {len(selected_features)}")
-    print("Selected features:", selected_features.tolist())
+    print(f"Selected features: {selected_features.tolist()}")
 
-    return pipe, selected_features
-
+    return lrcv, selected_features
