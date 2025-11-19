@@ -59,3 +59,13 @@ poetry run jupyter notebook notebooks/analysis.ipynb
 ```
 
 - Open [http://localhost:8888/tree](http://localhost:8888/tree) on browser to view notebook.
+
+### Using Pip
+
+See [requirements.txt](./requirements..txt)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```

@@ -25,24 +25,20 @@ def detect_outliers_isolation_forest(
     y_pred = iso_forest.fit_predict(X)
     return iso_forest, y_pred
 
+
 def detect_outliers_lof(
-    X: pd.DataFrame,
-    contamination: float = 0.05,
-    n_neighbors: int = 20
+    X: pd.DataFrame, contamination: float | str = "auto", n_neighbors: int = 20
 ) -> tuple[LocalOutlierFactor, np.ndarray, np.ndarray]:
     """
     detect outliers using Local Outlier Factor (LOF)
     """
 
     lof = LocalOutlierFactor(
-        n_neighbors=n_neighbors,
-        contamination=contamination,
-        novelty=False
+        n_neighbors=n_neighbors, contamination=contamination, novelty=False
     )
     y_pred = lof.fit_predict(X)
     scores = -lof.negative_outlier_factor_
     return lof, y_pred, scores
-
 
 
 def analyze_outliers(outliers_data: pd.DataFrame) -> None:
