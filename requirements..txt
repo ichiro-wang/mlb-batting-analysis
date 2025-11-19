@@ -5,4 +5,3 @@ matplotlib
 seaborn
 imblearn
 sklearn
-math

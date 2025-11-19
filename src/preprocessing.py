@@ -124,8 +124,13 @@ def impute_values(data: pd.DataFrame, strategy: str = "median") -> pd.DataFrame:
     """
     data = data.copy()
 
-    total_missing = data.isna().sum().sum()
+    missing = data.isna().sum()
+    to_impute = missing[missing > 0].index.tolist()
+
+    total_missing = missing.sum()
     print(f"Total missing values before imputing: {total_missing}")
+    print(f"\nImputing columns with missing values using {strategy}.")
+    print(to_impute)
 
     numerical_features = data.select_dtypes(include=[np.number]).columns
     if strategy == "median":

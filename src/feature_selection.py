@@ -100,6 +100,14 @@ def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
+def manually_keep_stats(data: pd.DataFrame, X: pd.DataFrame) -> pd.DataFrame:
+    """
+    manually select some features to keep
+    """
+    to_keep = ["Age", "Season", "Spd", ]
+    pass
+
+
 def apply_rfecv(X_train: pd.DataFrame, y_train: pd.Series) -> RFECV:
     """
     apply recursive feature elimination with cross validation to find best features
