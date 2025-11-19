@@ -9,6 +9,10 @@ import warnings
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFECV
 from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
 
 
 def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
@@ -122,3 +126,47 @@ def apply_rfecv(X_train: pd.DataFrame, y_train: pd.Series) -> RFECV:
     print(f"Optimal features: {rfecv.get_feature_names_out()}")
 
     return rfecv
+
+def apply_lasso(
+    X_train: pd.DataFrame,
+    y_train: pd.Series,
+    Cs: np.ndarray = None,
+    cv: int = 5,
+    tol: float = 1e-4,
+) -> tuple[Pipeline, pd.Index]:
+    """
+    L1-penalized Logistic Regression (LASSO-like) for classification feature selection.
+    """
+
+    pipe = Pipeline(
+        [
+            ("scaler", StandardScaler()),
+            (
+                "logregcv",
+                LogisticRegressionCV(
+                    Cs=Cs,
+                    cv=cv,
+                    penalty="l1",
+                    solver="saga",
+                    multi_class="ovr",
+                    scoring="accuracy",
+                    max_iter=5000,
+                    random_state=42,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
+    )
+
+    pipe.fit(X_train, y_train)
+    model = pipe.named_steps["logregcv"]
+
+    coef_matrix = model.coef_
+    nonzero_mask = (np.abs(coef_matrix) > tol).any(axis=0)
+
+    selected_features = X_train.columns[nonzero_mask]
+    print(f"Number of selected features: {len(selected_features)}")
+    print("Selected features:", selected_features.tolist())
+
+    return pipe, selected_features
+
