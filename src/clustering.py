@@ -33,16 +33,3 @@ def perform_kmeans_clustering(data, method, k_min = 2, k_max = 10, random_state 
     best_k = k_list[np.argmax(silhouette_scores)]
     return best_k
 
-def run_kmeans_with_best_k(data, method, best_k, random_state = 42):
-    """
-    Runs KMeans with the best k and returns cluster labels and centroids.
-    """
-    kmeans = KMeans(n_clusters=best_k, random_state=random_state)
-    cluster_labels = kmeans.fit_predict(data)
-    plt.figure(figsize=(7, 6))
-    plt.scatter(data[:, 0], data[:, 1], c=cluster_labels, s=40)
-    plt.title(f"K-Means Clustering (k={best_k}) using {method}")
-    plt.xlabel("Feature 1")
-    plt.ylabel("Feature 2")
-    plt.grid(True)
-    plt.show()
