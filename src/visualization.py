@@ -92,64 +92,50 @@ def plot_tier_distribution(data: pd.DataFrame, tier_order: list[str]) -> None:
     plt.show()
 
 
-def plot_pca_by_tier(
-    pca_result: np.ndarray, tiers: pd.Series, tier_order: list[str]
+def plot_pca(
+    pca_result: np.ndarray,
+    labels: pd.Series | np.ndarray | None = None,
+    label_order: list[str] | None = None,
+    title: str = "PCA Visualization of Batter Data",
+    colors: dict[float, str] | None = None,
+    contamination: float | None = None,
+    alpha: float | dict[str, float] = 0.7,
 ) -> None:
     """
-    use scatter plot to visualize PCA, coloured by performance tiers
+    use scatter plot to visualize PCA
     """
-    palette = sns.color_palette("deep", len(tier_order))
-    colors = dict(zip(tier_order, palette))
-
     plt.figure(figsize=(10, 6))
-    # PCA coloured by tiers
-    for tier in tier_order:
-        mask = tiers == tier
+
+    if labels is None:
         plt.scatter(
-            pca_result[mask, 0],
-            pca_result[mask, 1],
-            label=tier,
-            alpha=0.7,
+            pca_result[:, 0],
+            pca_result[:, 1],
+            alpha=alpha if isinstance(alpha, float) else 0.7,
             edgecolors="k",
-            color=colors[tier],
+            color="red",
         )
-    plt.xlabel("PC1")
-    plt.ylabel("PC2")
-    plt.title("PCA Visualization of Batter Data")
-    plt.legend()
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
-    plt.show()
+    else:
+        if not colors:
+            palette = sns.color_palette("deep", len(label_order))
+            colors = dict(zip(label_order, palette))
 
-
-def plot_outliers(
-    pca_result: np.ndarray, y_pred: np.ndarray, contamination: float = None
-):
-    """
-    plotting outliers on a scatter plot
-    """
-    labels = {"inlier": 1, "outlier": -1}
-    colors = {"inlier": "blue", "outlier": "red"}
-
-    plt.figure(figsize=(10, 6))
-    for label, value in labels.items():
-        mask = y_pred == value
-        alpha = 1 if label == "outlier" else 0.6
-        plt.scatter(
-            pca_result[mask, 0],
-            pca_result[mask, 1],
-            label=label,
-            alpha=alpha,
-            edgecolors="k",
-            color=colors[label],
-        )
+        for label in label_order:
+            mask = labels == label
+            plt.scatter(
+                pca_result[mask, 0],
+                pca_result[mask, 1],
+                label=label,
+                alpha=alpha[label] if isinstance(alpha, dict) else alpha,
+                edgecolors="k",
+                color=colors[label],
+            )
+        plt.legend(loc="upper left")
 
     plt.xlabel("PC1")
     plt.ylabel("PC2")
-    title = "PCA Visualization of Outliers"
     if contamination is not None:
         title += f" (contamination={contamination})"
     plt.title(title)
-    plt.legend()
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.show()
     

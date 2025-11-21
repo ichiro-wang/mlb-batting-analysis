@@ -2,9 +2,10 @@
 File: clustering.py
 Description: Apply clustering algorithms on data
 """
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, HDBSCAN
 from sklearn.metrics import silhouette_score
 
 def perform_kmeans_clustering(data, method, k_min = 2, k_max = 10, random_state = 42):
@@ -33,3 +34,29 @@ def perform_kmeans_clustering(data, method, k_min = 2, k_max = 10, random_state 
     best_k = k_list[np.argmax(silhouette_scores)]
     return best_k
 
+
+def apply_hdbscan(
+    X: pd.DataFrame, min_cluster_size: int = 10
+) -> tuple[HDBSCAN, np.ndarray]:
+    """
+    apply **HDBSCAN**
+    """
+    hdb = HDBSCAN(min_cluster_size=min_cluster_size, n_jobs=-1)
+    y_pred = hdb.fit_predict(X)
+    return hdb, y_pred
+
+
+def evaluate_clustering(X: pd.DataFrame, labels: np.ndarray) -> float:
+    """
+    evaluating clustering performance using various metrics
+    """
+    n_labels = len(set(labels))
+    if n_labels <= 1:
+        print("Need more than 1 cluster")
+        return None
+
+    sil_score = silhouette_score(X, labels)
+
+    print(f"silhouette = {sil_score}")
+    
+    return sil_score

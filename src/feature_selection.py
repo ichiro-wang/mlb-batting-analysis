@@ -102,7 +102,7 @@ def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
 
     for name, stats in to_remove.items():
         data.drop(columns=stats, inplace=True, errors="ignore")
-        print(f"Removing {name}: {stats}")
+        print(f"Removing {len(stats)} {name}: {stats}")
 
     return data
 
@@ -158,7 +158,7 @@ def apply_lasso(
     """
     L1-penalized Logistic Regression (LASSO-like) for classification feature selection.
     """
-    warnings.filterwarnings("ignore", message="deprecated")
+    warnings.filterwarnings("ignore", category=FutureWarning)
 
     cv_split = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
