@@ -7,6 +7,8 @@ import math
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 import seaborn as sns
 
 
@@ -149,4 +151,21 @@ def plot_outliers(
     plt.title(title)
     plt.legend()
     plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.show()
+    
+def plot_best_k(data,method, best_k, random_state = 42):
+    """
+    Runs KMeans with the best k, applies PCA for 2D visualization,
+    and plots the clusters.
+    """
+    kmeans = KMeans(n_clusters=best_k, random_state=random_state)
+    cluster_labels = kmeans.fit_predict(data)
+    PCA_model = PCA(n_components=2)
+    pca_result = PCA_model.fit_transform(data)
+    plt.figure(figsize=(7, 6))
+    plt.scatter(pca_result[:, 0], pca_result[:, 1], c=cluster_labels, s=40)
+    plt.title(f"K-Means Clustering (k={best_k}) using {method} (PCA Reduced)")
+    plt.xlabel("PCA Component 1");
+    plt.ylabel("PCA Component 2");
+    plt.grid(True)
     plt.show()
