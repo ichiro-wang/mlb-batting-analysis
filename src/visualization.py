@@ -3,7 +3,6 @@ File: visualization.py
 Description: Helper functions for plotting and visualizing data
 """
 
-import math
 import warnings
 import pandas as pd
 import numpy as np
@@ -24,7 +23,7 @@ def plot_distributions(
     :param type: type of plot you want (histograms or box plots)
     """
     cols = 4
-    rows = math.ceil(len(key_stats) / cols)
+    rows = int(np.ceil(len(key_stats) / cols))
 
     fig, axs = plt.subplots(rows, cols, figsize=(15, 12))
     axs = axs.ravel()
@@ -193,9 +192,9 @@ def plot_kmeans_scores(
     results: dict[str, any],
 ) -> None:
     cols = 2
-    rows = math.ceil(len(results) / cols) * 2
+    rows = int(np.ceil(len(results) / cols) * 2)
 
-    fig, axs = plt.subplots(rows, cols, figsize=(15, 20))
+    fig, axs = plt.subplots(rows, cols, figsize=(4 * cols, 4 * rows))
     axs = axs.ravel()
 
     feat_select_method_names = list(results.keys())
@@ -237,9 +236,9 @@ def plot_clusters(results: dict[str, any], cluster_method: str) -> None:
     warnings.filterwarnings("ignore", category=UserWarning)
 
     cols = 2
-    rows = math.ceil(len(results) / cols)
+    rows = int(np.ceil(len(results) / cols))
 
-    fig, axs = plt.subplots(rows, cols, figsize=(15, 12))
+    fig, axs = plt.subplots(rows, cols, figsize=(4 * cols, 4 * rows))
     axs = axs.ravel()
 
     feat_select_methods = list(results.keys())
@@ -268,10 +267,15 @@ def plot_clusters(results: dict[str, any], cluster_method: str) -> None:
 
 
 def plot_dendrograms(results: dict[str, any], **kwargs) -> None:
-    cols = 2
-    rows = math.ceil(len(results) / cols)
+    """
+    plot dendrograms from hierarchical clustering
 
-    fig, axs = plt.subplots(rows, cols, figsize=(15, 12))
+    help from: https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html
+    """
+    cols = 2
+    rows = int(np.ceil(len(results) / cols))
+
+    fig, axs = plt.subplots(rows, cols, figsize=(4 * cols, 4 * rows))
     axs = axs.ravel()
 
     feat_select_methods = list(results.keys())
@@ -300,5 +304,54 @@ def plot_dendrograms(results: dict[str, any], **kwargs) -> None:
         ax.set_visible(False)
 
     plt.suptitle("Hierarchical Clusterings", fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.show()
+
+
+def plot_cluster_radars(data: pd.DataFrame, labels: np.ndarray, stats: list[str] = ["AVG+", "OBP+", "SLG+"]) -> None:
+    """
+    plotting stats within clusters to spot potential patterns
+    """
+    cluster_summary = data.groupby(labels)[stats].mean()
+
+    global_min = cluster_summary.min().min()
+    global_max = cluster_summary.max().max()
+    
+    num_stats = len(stats)
+    clusters = cluster_summary.index.tolist()
+    num_clusters = len(clusters)
+    
+    # angular positions
+    angles = np.linspace(0, 2 * np.pi, num_stats, endpoint=False).tolist()
+    angles += angles[:1]
+    
+    cols = 2
+    rows = int(np.ceil(num_clusters / cols))
+    
+    fig, axs = plt.subplots(rows, cols, figsize=(4 * cols, 4 * rows), subplot_kw=dict(polar=True))
+    axs = axs.ravel()
+
+    color_cycle = plt.cm.tab10(np.linspace(0, 1, num_clusters))
+    
+    for i, cluster in enumerate(clusters):
+        ax = axs[i]
+        
+        values = cluster_summary.loc[cluster].tolist()
+        values += values[:1]
+        
+        ax.plot(angles, values, linewidth=2, color=color_cycle[i])
+        ax.fill(angles, values, alpha=0.2, color=color_cycle[i])
+        
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(stats)
+        
+        ax.set_ylim(global_min, global_max)
+        
+        ax.set_title(f"Cluster {cluster}")
+    
+    for j in range(i + 1, len(axs)):
+        axs[j].set_visible(False)
+        
+    plt.suptitle("Key Stats Within Clusters", fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.show()
