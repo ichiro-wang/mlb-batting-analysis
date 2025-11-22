@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 from imblearn.over_sampling import SMOTE
 
 
@@ -216,6 +217,16 @@ def apply_pca(data: pd.DataFrame, n_components: int = 2) -> tuple[np.ndarray, PC
     return pca_result, pca
 
 
+def apply_tsne(data: pd.DataFrame, n_components: int = 2) -> tuple[np.ndarray, TSNE]:
+    """
+    apply t-SNE
+    """
+    tsne = TSNE(n_components=n_components, random_state=42)
+    tsne_result = tsne.fit_transform(data)
+    
+    return tsne_result, tsne
+
+
 def check_correlations(data: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     """
     given a list of features, return their correlation matrix
@@ -238,3 +249,4 @@ def convert_sb_cs_rate(data: pd.DataFrame) -> pd.DataFrame:
     data = data.drop(columns=["SB", "CS"])
 
     return data
+

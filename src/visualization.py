@@ -4,12 +4,13 @@ Description: Helper functions for plotting and visualizing data
 """
 
 import math
+import warnings
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
 import seaborn as sns
+from sklearn.cluster import AgglomerativeClustering
+from scipy.cluster.hierarchy import dendrogram
 
 
 def plot_distributions(
@@ -138,20 +139,166 @@ def plot_pca(
     plt.title(title)
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.show()
+
+
+def plot_tsne(
+    tsne_result: np.ndarray,
+    labels: pd.Series | np.ndarray | None = None,
+    label_order: list[str] | None = None,
+    title: str = "t-SNE Visualization of Batter Data",
+    colors: dict[float, str] | None = None,
+    alpha: float | dict[str, float] = 0.7,
+) -> None:
+    """
+    use scatter plot to visualize t-sne
+    """
+    plt.figure(figsize=(10, 6))
+
+    if labels is None:
+        plt.scatter(
+            tsne_result[:, 0],
+            tsne_result[:, 1],
+            alpha=alpha if isinstance(alpha, float) else 0.7,
+            edgecolors="k",
+            color="red",
+        )
+    else:
+        if label_order is None:
+            label_order = sorted(np.unique(labels))
+        if not colors:
+            palette = sns.color_palette("deep", len(label_order))
+            colors = dict(zip(label_order, palette))
+
+        for label in label_order:
+            mask = labels == label
+            plt.scatter(
+                tsne_result[mask, 0],
+                tsne_result[mask, 1],
+                label=label,
+                alpha=alpha[label] if isinstance(alpha, dict) else alpha,
+                edgecolors="k",
+                color=colors[label],
+            )
+        plt.legend(loc="upper left")
+
+    plt.xlabel("t-SNE 1")
+    plt.ylabel("t-SNE 2")
+    plt.title(title)
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.show()
+
+
+def plot_kmeans_scores(
+    k_list: list[int],
+    results: dict[str, any],
+) -> None:
+    cols = 2
+    rows = math.ceil(len(results) / cols) * 2
+
+    fig, axs = plt.subplots(rows, cols, figsize=(15, 20))
+    axs = axs.ravel()
+
+    feat_select_method_names = list(results.keys())
+
+    for i, method_name in enumerate(feat_select_method_names):
+        scores = results[method_name]["silhouette_scores"]
+
+        axs[i].plot(k_list, scores, marker="o")
+        axs[i].set_xlabel("Number of Clusters (k)")
+        axs[i].set_ylabel("Silhouette Score")
+        axs[i].set_title(f"Silhouette Score vs k ({method_name})")
+
+    if "inertias" in results["None"]:
+        for i, method_name in enumerate(
+            feat_select_method_names, len(feat_select_method_names)
+        ):
+            scores = results[method_name]["inertias"]
+
+            axs[i].plot(k_list, scores, marker="o")
+            axs[i].set_xlabel("Number of Clusters (k)")
+            axs[i].set_ylabel("Inertia")
+            axs[i].set_title(f"Inertia vs k ({method_name})")
+
+    # hide remaining
+    if "inertias" in results["None"]:
+        for ax in axs[len(results) * 2 :]:
+            ax.set_visible(False)
+    else:
+        for ax in axs[len(results) :]:
+            ax.set_visible(False)
+
+    plt.suptitle(f"Scores of Various Feature Selection Methods", fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.show()
+
+
+def plot_clusters(results: dict[str, any], cluster_method: str) -> None:
     
-def plot_best_k(data,method, best_k, random_state = 42):
-    """
-    Runs KMeans with the best k, applies PCA for 2D visualization,
-    and plots the clusters.
-    """
-    kmeans = KMeans(n_clusters=best_k, random_state=random_state)
-    cluster_labels = kmeans.fit_predict(data)
-    PCA_model = PCA(n_components=2)
-    pca_result = PCA_model.fit_transform(data)
-    plt.figure(figsize=(7, 6))
-    plt.scatter(pca_result[:, 0], pca_result[:, 1], c=cluster_labels, s=40)
-    plt.title(f"K-Means Clustering (k={best_k}) using {method} (PCA Reduced)")
-    plt.xlabel("PCA Component 1");
-    plt.ylabel("PCA Component 2");
-    plt.grid(True)
+    warnings.filterwarnings("ignore", category=UserWarning)
+
+    cols = 2
+    rows = math.ceil(len(results) / cols)
+
+    fig, axs = plt.subplots(rows, cols, figsize=(15, 12))
+    axs = axs.ravel()
+
+    feat_select_methods = list(results.keys())
+
+    for i, method_name in enumerate(feat_select_methods):
+        pca_result = results[method_name]["pca_result"]
+        labels = results[method_name]["labels"]
+
+        scatter = axs[i].scatter(
+            pca_result[:, 0], pca_result[:, 1], c=labels, cmap="tab10", alpha=0.7
+        )
+        axs[i].set_title(
+            f"{cluster_method} Clustering (method={method_name})"
+        )
+        axs[i].set_xlabel("PC1")
+        axs[i].set_ylabel("PC1")
+        
+        axs[i].legend(*scatter.legend_elements(), title="Clusters", loc="upper left")
+
+    for ax in axs[len(results) :]:
+        ax.set_visible(False)
+
+    plt.suptitle(f"{cluster_method} Clusterings", fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.show()
+
+
+def plot_dendrograms(results: dict[str, any], **kwargs) -> None:
+    cols = 2
+    rows = math.ceil(len(results) / cols)
+
+    fig, axs = plt.subplots(rows, cols, figsize=(15, 12))
+    axs = axs.ravel()
+
+    feat_select_methods = list(results.keys())
+
+    for i, method_name in enumerate(feat_select_methods):
+        model: AgglomerativeClustering = results[method_name]["model"]
+        counts = np.zeros(model.children_.shape[0])
+        n_samples = len(model.labels_)
+        for j, merge in enumerate(model.children_):
+            current_count = 0
+            for child_idx in merge:
+                if child_idx < n_samples:
+                    current_count += 1  # leaf node
+                else:
+                    current_count += counts[child_idx - n_samples]
+            counts[j] = current_count
+
+        linkage_matrix = np.column_stack(
+            [model.children_, model.distances_, counts]
+        ).astype(float)
+
+        dendrogram(linkage_matrix, ax=axs[i], **kwargs)
+        axs[i].set_title(f"Hierarchical Clustering Dendrogram ({method_name})")
+
+    for ax in axs[len(results) :]:
+        ax.set_visible(False)
+
+    plt.suptitle("Hierarchical Clusterings", fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.show()
