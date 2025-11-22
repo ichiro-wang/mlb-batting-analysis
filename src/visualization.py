@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
-
+from sklearn.metrics import confusion_matrix
+from sklearn.decomposition import PCA
 
 def plot_distributions(
     data: pd.DataFrame, key_stats: list[str], type: str = "histograms"
@@ -355,3 +356,25 @@ def plot_cluster_radars(data: pd.DataFrame, labels: np.ndarray, stats: list[str]
     plt.suptitle("Key Stats Within Clusters", fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.show()
+    
+def plot_confusion_matrix(y_test, y_pred, title):
+    """
+    Plots the confusion matrix for classification results.
+    """
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title(title)
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
+    plt.tight_layout()
+    plt.show()
+
+def show_classfication_metrics(metrics: dict, model) -> None:
+    """
+    Display classification metrics in a readable format.
+    """
+    print(f"\n{model} Metrics:")
+    for metric, value in metrics.items():
+        print(f"{metric}: {value:.4f}")
