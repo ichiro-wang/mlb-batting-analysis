@@ -25,11 +25,6 @@ def evaluate_random_forest(X_train, X_test, y_train, y_test, cv_folds=5, random_
         "CV_mean_accuracy": np.mean(cross_val_scores),
         "CV_std_accuracy": np.std(cross_val_scores)
     }
-    if len(np.unique(y_test)) == 2:  # Binary classification
-        y_prob = rf.predict_proba(X_test)[:, 1]
-        metrics["ROC AUC"] = roc_auc_score(y_test, y_prob)
-    else:
-        y_prob = None
-    return metrics, y_test, y_pred, y_prob
+    return metrics, y_test, y_pred
     
     

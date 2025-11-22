@@ -184,26 +184,6 @@ def plot_confusion_matrix(y_test, y_pred, title):
     plt.ylabel('True Label')
     plt.tight_layout()
     plt.show()
-    
-def plot_roc_curve(y_test, y_prob, title):
-    """
-    Plots the ROC curve for binary classification results.
-    """
-    if y_prob is None:
-        raise ValueError("ROC curve requires predicted probabilities (y_prob) for binary classification.")
-    fpr, tpr, _ = roc_curve(y_test, y_prob)
-    roc_auc = auc(fpr, tpr)
-
-    plt.figure(figsize=(8, 6))
-    plt.plot(fpr, tpr, color='blue', label=f'ROC curve (area = {roc_auc:.2f})')
-    plt.plot([0, 1], [0, 1], color='red', linestyle='--')
-    plt.title(title)
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.legend(loc='lower right')
-    plt.grid(True)
-    plt.tight_layout()
-    plt.show()
 
 def show_classfication_metrics(metrics: dict, model) -> None:
     """
