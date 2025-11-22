@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.metrics import confusion_matrix, roc_curve, auc
 import seaborn as sns
 
 
@@ -169,3 +170,45 @@ def plot_best_k(data,method, best_k, random_state = 42):
     plt.ylabel("PCA Component 2");
     plt.grid(True)
     plt.show()
+    
+def plot_confusion_matrix(y_test, y_pred, title):
+    """
+    Plots the confusion matrix for classification results.
+    """
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title(title)
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
+    plt.tight_layout()
+    plt.show()
+    
+def plot_roc_curve(y_test, y_prob, title):
+    """
+    Plots the ROC curve for binary classification results.
+    """
+    if y_prob is None:
+        raise ValueError("ROC curve requires predicted probabilities (y_prob) for binary classification.")
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, color='blue', label=f'ROC curve (area = {roc_auc:.2f})')
+    plt.plot([0, 1], [0, 1], color='red', linestyle='--')
+    plt.title(title)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+def show_classfication_metrics(metrics: dict, model) -> None:
+    """
+    Display classification metrics in a readable format.
+    """
+    print(f"\n{model} Metrics:")
+    for metric, value in metrics.items():
+        print(f"{metric}: {value:.4f}")
