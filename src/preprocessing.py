@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 from imblearn.over_sampling import SMOTE
 
 
@@ -52,6 +53,15 @@ def fix_dollar_column(data: pd.DataFrame, column: str = "Dol") -> pd.DataFrame:
     )
     print(f"\nFixed '{column}' format")
 
+    return data
+
+
+def rename_column(
+    data: pd.DataFrame, original_name: str, new_name: str
+) -> pd.DataFrame:
+    data = data.copy()
+    data[new_name] = data[original_name]
+    data.drop(columns=[original_name], inplace=True)
     return data
 
 
@@ -191,12 +201,12 @@ def apply_smote(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd.Series,
     return X_resampled, y_resampled, sm
 
 
-def apply_pca(numerical_data: pd.DataFrame) -> tuple[np.ndarray, PCA]:
+def apply_pca(data: pd.DataFrame, n_components: int = 2) -> tuple[np.ndarray, PCA]:
     """
     apply PCA to reduce dimensions
     """
-    pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(numerical_data)
+    pca = PCA(n_components=n_components)
+    pca_result = pca.fit_transform(data)
 
     print(f"PC1 explains {pca.explained_variance_ratio_[0]:.2%} of the data")
     print(f"PC2 explains {pca.explained_variance_ratio_[1]:.2%} of the data")
@@ -205,6 +215,16 @@ def apply_pca(numerical_data: pd.DataFrame) -> tuple[np.ndarray, PCA]:
     )
 
     return pca_result, pca
+
+
+def apply_tsne(data: pd.DataFrame, n_components: int = 2) -> tuple[np.ndarray, TSNE]:
+    """
+    apply t-SNE
+    """
+    tsne = TSNE(n_components=n_components, random_state=42)
+    tsne_result = tsne.fit_transform(data)
+    
+    return tsne_result, tsne
 
 
 def check_correlations(data: pd.DataFrame, features: list[str]) -> pd.DataFrame:
@@ -229,3 +249,4 @@ def convert_sb_cs_rate(data: pd.DataFrame) -> pd.DataFrame:
     data = data.drop(columns=["SB", "CS"])
 
     return data
+
