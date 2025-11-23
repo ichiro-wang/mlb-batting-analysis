@@ -18,6 +18,7 @@
   - [outlier_detection.py](./src/outlier_detection.py)
   - [feature_selection.py](./src/feature_selection.py)
   - [preprocessing.py](./src/preprocessing.py)
+  - [hyperparameter.py](./src/hyperparameter.py)
 - [Dockerfile](./Dockerfile)
 - [poetry.lock](./poetry.lock)
 - [pyproject.toml](./pyproject.toml)
