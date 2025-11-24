@@ -15,8 +15,9 @@ def load_raw_data() -> pd.DataFrame:
 def load_cleaned_data(reference_data: bool = False) -> pd.DataFrame:
     if reference_data:
         filepath = "../data/processed/batting_2015_2024_reference.csv"
-        print(f"Loading reference data from '{filepath}'")
     else:
         filepath = "../data/processed/batting_2015_2024_cleaned.csv"
-        print(f"Loading cleaned data from '{filepath}'")
+    print(
+        f"Loading {'reference' if reference_data else 'cleaned'} data from '{filepath}'"
+    )
     return pd.read_csv(filepath)

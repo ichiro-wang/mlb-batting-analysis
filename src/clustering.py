@@ -14,8 +14,7 @@ from sklearn.metrics import (
 
 
 def apply_kmeans(
-    data: pd.DataFrame,
-    k_list: list[int] = list(range(2, 11)),
+    data: pd.DataFrame, k_list: list[int] = list(range(2, 11)), random_state: int = 42
 ) -> tuple[int, list[float], list[float], np.ndarray]:
     """
     Runs KMeans for k in range [k_min, k_max], and plots silhouette scores,
@@ -29,7 +28,7 @@ def apply_kmeans(
     best_k = 0
 
     for k in k_list:
-        kmeans = KMeans(n_clusters=k, random_state=42)
+        kmeans = KMeans(n_clusters=k, random_state=random_state)
         cluster_labels = kmeans.fit_predict(data)
         score = silhouette_score(data, cluster_labels)
         silhouette_scores.append(score)

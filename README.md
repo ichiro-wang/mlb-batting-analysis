@@ -14,11 +14,11 @@
   - [classification.py](./src/classification.py)
   - [clustering.py](./src/clustering.py)
   - [data_loader.py](./src/data_loader.py)
-  - [visualization.py](./src/visualization.py)
-  - [outlier_detection.py](./src/outlier_detection.py)
   - [feature_selection.py](./src/feature_selection.py)
-  - [preprocessing.py](./src/preprocessing.py)
   - [hyperparameter.py](./src/hyperparameter.py)
+  - [outlier_detection.py](./src/outlier_detection.py)
+  - [preprocessing.py](./src/preprocessing.py)
+  - [visualization.py](./src/visualization.py)
 - [Dockerfile](./Dockerfile)
 - [poetry.lock](./poetry.lock)
 - [pyproject.toml](./pyproject.toml)
@@ -41,30 +41,23 @@ docker build . -t mlb
 docker run -p 8888:8888 mlb
 ```
 
-- Open [http://localhost:8888/tree](http://localhost:8888/tree) on browser to view notebook.
+- Open [http://localhost:8888/tree](http://localhost:8888/tree) on browser to view the notebook.
 
 ### Using Poetry
 
 - Install poetry [here](https://python-poetry.org/).
 
-#### Install Libraries
-
 ```bash
 poetry install --no-root
 poetry run ipython kernel install --name "mlb-batting-analysis-env" --user
-```
-
-#### Run Notebook
-
-```bash
 poetry run jupyter notebook notebooks/analysis.ipynb
 ```
 
-- Open [http://localhost:8888/tree](http://localhost:8888/tree) on browser to view notebook.
+- Open [http://localhost:8888/tree](http://localhost:8888/tree) on browser to view the notebook.
 
 ### Using Pip
 
-See [requirements.txt](./requirements..txt)
+- See [requirements.txt](./requirements..txt)
 
 ```bash
 python3 -m venv .venv

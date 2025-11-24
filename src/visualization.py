@@ -3,7 +3,6 @@ File: visualization.py
 Description: Helper functions for plotting and visualizing data
 """
 
-import warnings
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,6 +11,7 @@ from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import PCA
+
 
 def plot_distributions(
     data: pd.DataFrame, key_stats: list[str], type: str = "histograms"
@@ -188,14 +188,21 @@ def plot_tsne(
     plt.show()
 
 
-def plot_kmeans_scores(
+def plot_scores(
     k_list: list[int],
     results: dict[str, any],
 ) -> None:
-    cols = 2
-    rows = int(np.ceil(len(results) / cols) * 2)
+    """
+    plotting silhouette scores of different clustering methods and different feature selection methods
 
-    fig, axs = plt.subplots(rows, cols, figsize=(4 * cols, 4 * rows))
+    subplots for visual comparison
+    """
+    include_inertia = "inertias" in results["None"]
+
+    cols = 2
+    rows = int(np.ceil(len(results) / cols) * (2 if include_inertia else 1))
+
+    fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
     axs = axs.ravel()
 
     feat_select_method_names = list(results.keys())
@@ -208,7 +215,7 @@ def plot_kmeans_scores(
         axs[i].set_ylabel("Silhouette Score")
         axs[i].set_title(f"Silhouette Score vs k ({method_name})")
 
-    if "inertias" in results["None"]:
+    if include_inertia:
         for i, method_name in enumerate(
             feat_select_method_names, len(feat_select_method_names)
         ):
@@ -220,12 +227,8 @@ def plot_kmeans_scores(
             axs[i].set_title(f"Inertia vs k ({method_name})")
 
     # hide remaining
-    if "inertias" in results["None"]:
-        for ax in axs[len(results) * 2 :]:
-            ax.set_visible(False)
-    else:
-        for ax in axs[len(results) :]:
-            ax.set_visible(False)
+    for ax in axs[len(results) * (2 if include_inertia else 1) :]:
+        ax.set_visible(False)
 
     plt.suptitle(f"Scores of Various Feature Selection Methods", fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.98])
@@ -233,8 +236,11 @@ def plot_kmeans_scores(
 
 
 def plot_clusters(results: dict[str, any], cluster_method: str) -> None:
-    
-    warnings.filterwarnings("ignore", category=UserWarning)
+    """
+    plotting clusterings of different clustering methods and feature selection methods
+
+    subplots for visual comparison
+    """
 
     cols = 2
     rows = int(np.ceil(len(results) / cols))
@@ -251,13 +257,11 @@ def plot_clusters(results: dict[str, any], cluster_method: str) -> None:
         scatter = axs[i].scatter(
             pca_result[:, 0], pca_result[:, 1], c=labels, cmap="tab10", alpha=0.7
         )
-        axs[i].set_title(
-            f"{cluster_method} Clustering (method={method_name})"
-        )
+        axs[i].set_title(f"{cluster_method} Clustering (method={method_name})")
         axs[i].set_xlabel("PC1")
         axs[i].set_ylabel("PC1")
-        
-        axs[i].legend(*scatter.legend_elements(), title="Clusters", loc="upper left")
+
+        axs[i].legend(*scatter.legend_elements(), title="Clusters", loc="upper right")
 
     for ax in axs[len(results) :]:
         ax.set_visible(False)
@@ -300,6 +304,7 @@ def plot_dendrograms(results: dict[str, any], **kwargs) -> None:
 
         dendrogram(linkage_matrix, ax=axs[i], **kwargs)
         axs[i].set_title(f"Hierarchical Clustering Dendrogram ({method_name})")
+        axs[i].tick_params(axis="x", rotation=60, labelsize=10)
 
     for ax in axs[len(results) :]:
         ax.set_visible(False)
@@ -309,7 +314,9 @@ def plot_dendrograms(results: dict[str, any], **kwargs) -> None:
     plt.show()
 
 
-def plot_cluster_radars(data: pd.DataFrame, labels: np.ndarray, stats: list[str] = ["AVG+", "OBP+", "SLG+"]) -> None:
+def plot_cluster_radars(
+    data: pd.DataFrame, labels: np.ndarray, stats: list[str] = ["AVG+", "OBP+", "SLG+"]
+) -> None:
     """
     plotting stats within clusters to spot potential patterns
     """
@@ -317,59 +324,60 @@ def plot_cluster_radars(data: pd.DataFrame, labels: np.ndarray, stats: list[str]
 
     global_min = cluster_summary.min().min()
     global_max = cluster_summary.max().max()
-    
+
     num_stats = len(stats)
     clusters = cluster_summary.index.tolist()
     num_clusters = len(clusters)
-    
+
     # angular positions
     angles = np.linspace(0, 2 * np.pi, num_stats, endpoint=False).tolist()
     angles += angles[:1]
-    
+
     cols = 2
     rows = int(np.ceil(num_clusters / cols))
-    
-    fig, axs = plt.subplots(rows, cols, figsize=(4 * cols, 4 * rows), subplot_kw=dict(polar=True))
+
+    fig, axs = plt.subplots(
+        rows, cols, figsize=(4 * cols, 4 * rows), subplot_kw=dict(polar=True)
+    )
     axs = axs.ravel()
 
     color_cycle = plt.cm.tab10(np.linspace(0, 1, num_clusters))
-    
+
     for i, cluster in enumerate(clusters):
         ax = axs[i]
-        
+
         values = cluster_summary.loc[cluster].tolist()
         values += values[:1]
-        
+
         ax.plot(angles, values, linewidth=2, color=color_cycle[i])
         ax.fill(angles, values, alpha=0.2, color=color_cycle[i])
-        
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(stats)
-        
         ax.set_ylim(global_min, global_max)
-        
         ax.set_title(f"Cluster {cluster}")
-    
+
     for j in range(i + 1, len(axs)):
         axs[j].set_visible(False)
-        
+
     plt.suptitle("Key Stats Within Clusters", fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.show()
-    
-def plot_confusion_matrix(y_test, y_pred, title):
+
+
+def plot_confusion_matrix(
+    y_test: pd.Series, y_pred: pd.Series, title: str = "Confusion Matrix"
+) -> None:
     """
     Plots the confusion matrix for classification results.
     """
-
     cm = confusion_matrix(y_test, y_pred)
     plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
     plt.title(title)
-    plt.xlabel('Predicted Label')
-    plt.ylabel('True Label')
+    plt.xlabel("Predicted Label")
+    plt.ylabel("True Label")
     plt.tight_layout()
     plt.show()
+
 
 def show_classfication_metrics(metrics: dict, model) -> None:
     """

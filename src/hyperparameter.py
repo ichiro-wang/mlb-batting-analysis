@@ -2,11 +2,23 @@
 File: outlier_detection.py
 Description: Apply hyperparameter tuning on models
 """
+
 import numpy as np
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-def random_search_rf(rf, X_train, Y_train, X_test, y_test, n_iter, cv, scoring="accuracy", random_state=42):
+
+def random_search_rf(
+    rf,
+    X_train,
+    Y_train,
+    X_test,
+    y_test,
+    n_iter,
+    cv,
+    scoring="accuracy",
+    random_state=42,
+):
     """
     Perform RandomizedSearchCV on a RandomForestClassifier and return results
     in the same structure as evaluate_random_forest().
@@ -18,7 +30,7 @@ def random_search_rf(rf, X_train, Y_train, X_test, y_test, n_iter, cv, scoring="
         "min_samples_split": np.arange(2, 20),
         "min_samples_leaf": np.arange(1, 20),
         "max_features": ["sqrt", "log2", None],
-        "bootstrap": [True, False]
+        "bootstrap": [True, False],
     }
 
     random_search = RandomizedSearchCV(
@@ -29,7 +41,7 @@ def random_search_rf(rf, X_train, Y_train, X_test, y_test, n_iter, cv, scoring="
         scoring=scoring,
         verbose=1,
         random_state=random_state,
-        n_jobs=-1
+        n_jobs=-1,
     )
 
     # Run tuning
@@ -50,10 +62,18 @@ def random_search_rf(rf, X_train, Y_train, X_test, y_test, n_iter, cv, scoring="
     # Metrics formatted same as evaluate_random_forest
     tuned_metrics = {
         "Accuracy": accuracy_score(y_test, y_pred_tuned),
-        "Precision": precision_score(y_test, y_pred_tuned, average='weighted'),
-        "Recall": recall_score(y_test, y_pred_tuned, average='weighted'),
-        "F1 Score": f1_score(y_test, y_pred_tuned, average='weighted'),
-        "CV_mean_accuracy": best_score
+        "Precision": precision_score(y_test, y_pred_tuned, average="weighted"),
+        "Recall": recall_score(y_test, y_pred_tuned, average="weighted"),
+        "F1 Score": f1_score(y_test, y_pred_tuned, average="weighted"),
+        "CV_mean_accuracy": best_score,
     }
 
-    return best_model, tuned_metrics, y_test, y_pred_tuned, y_prob_tuned, X_train, Y_train
+    return (
+        best_model,
+        tuned_metrics,
+        y_test,
+        y_pred_tuned,
+        y_prob_tuned,
+        X_train,
+        Y_train,
+    )
