@@ -5,13 +5,10 @@ Description: Apply feature selection algorithms on data
 
 import pandas as pd
 import numpy as np
-import warnings
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFECV
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegressionCV
-from sklearn.pipeline import Pipeline
 
 
 def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
@@ -108,16 +105,21 @@ def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def apply_rfecv(
-    X_train: pd.DataFrame, y_train: pd.Series, n_splits: int = 5, step_size: int = 1
+    X_train: pd.DataFrame,
+    y_train: pd.Series,
+    n_splits: int = 5,
+    step_size: int = 1,
+    random_state: int = 42,
 ) -> tuple[RFECV, np.ndarray[str]]:
     """
     apply recursive feature elimination with cross validation to find best features
     """
-    warnings.filterwarnings("ignore", message="deprecated")
 
     # use a stratified n_splits strategy
-    cv_split = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
-    rf = RandomForestClassifier(random_state=42)
+    cv_split = StratifiedKFold(
+        n_splits=n_splits, shuffle=True, random_state=random_state
+    )
+    rf = RandomForestClassifier(random_state=random_state)
 
     rfecv = RFECV(
         estimator=rf,
@@ -142,13 +144,15 @@ def apply_lasso(
     Cs: np.ndarray | None = None,
     n_splits: int = 5,
     tol: float = 1e-4,
+    random_state: int = 42,
 ) -> tuple[LogisticRegressionCV, np.ndarray[str]]:
     """
     L1-penalized Logistic Regression (LASSO-like) for classification feature selection.
     """
-    warnings.filterwarnings("ignore", category=FutureWarning)
 
-    cv_split = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
+    cv_split = StratifiedKFold(
+        n_splits=n_splits, shuffle=True, random_state=random_state
+    )
 
     lrcv = LogisticRegressionCV(
         Cs=Cs,
@@ -158,7 +162,7 @@ def apply_lasso(
         multi_class="ovr",
         scoring="accuracy",
         max_iter=5000,
-        random_state=42,
+        random_state=random_state,
         n_jobs=-1,
     )
 

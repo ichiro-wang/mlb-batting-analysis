@@ -186,11 +186,23 @@ def standardize_features(data: pd.DataFrame) -> tuple[pd.DataFrame, StandardScal
     return data, scaler
 
 
-def apply_smote(X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, pd.Series, SMOTE]:
+def inverse_standardized_features(
+    data: pd.DataFrame, scaler: StandardScaler
+) -> pd.DataFrame:
+    """
+    scale back to original data
+    """
+    data = scaler.inverse_transform(data)
+    return data
+
+
+def apply_smote(
+    X: pd.DataFrame, y: pd.Series, random_state: int = 42
+) -> tuple[pd.DataFrame, pd.Series, SMOTE]:
     """
     generate synthetic samples to deal with class imbalance
     """
-    sm = SMOTE(random_state=42)
+    sm = SMOTE(random_state=random_state)
 
     X_resampled, y_resampled = sm.fit_resample(X, y)
 
@@ -217,13 +229,15 @@ def apply_pca(data: pd.DataFrame, n_components: int = 2) -> tuple[np.ndarray, PC
     return pca_result, pca
 
 
-def apply_tsne(data: pd.DataFrame, n_components: int = 2) -> tuple[np.ndarray, TSNE]:
+def apply_tsne(
+    data: pd.DataFrame, n_components: int = 2, random_state: int = 42
+) -> tuple[np.ndarray, TSNE]:
     """
     apply t-SNE
     """
-    tsne = TSNE(n_components=n_components, random_state=42)
+    tsne = TSNE(n_components=n_components, random_state=random_state)
     tsne_result = tsne.fit_transform(data)
-    
+
     return tsne_result, tsne
 
 
@@ -249,4 +263,3 @@ def convert_sb_cs_rate(data: pd.DataFrame) -> pd.DataFrame:
     data = data.drop(columns=["SB", "CS"])
 
     return data
-

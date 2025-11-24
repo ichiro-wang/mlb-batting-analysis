@@ -10,7 +10,7 @@ from sklearn.neighbors import LocalOutlierFactor
 
 
 def detect_outliers_isolation_forest(
-    X: pd.DataFrame, contamination: float | str = "auto"
+    X: pd.DataFrame, contamination: float | str = "auto", random_state: int = 42
 ) -> tuple[IsolationForest, np.ndarray]:
     """
     detect outliers using an isolation forest
@@ -21,7 +21,7 @@ def detect_outliers_isolation_forest(
     :returns iso_forest: the isolation forest model
     :returns y_pred: list of +1 for inliers and -1 for outliers
     """
-    iso_forest = IsolationForest(contamination=contamination, random_state=42)
+    iso_forest = IsolationForest(contamination=contamination, random_state=random_state)
     y_pred = iso_forest.fit_predict(X)
     return iso_forest, y_pred
 
