@@ -5,6 +5,7 @@ Description: Helper functions for preprocessing data
 
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
@@ -169,6 +170,17 @@ def fix_team_values(data: pd.DataFrame) -> pd.DataFrame:
     data["Team"] = data["Team"].replace("- - -", "Multiple")
 
     return data
+
+
+def create_train_test_split(
+    X: pd.DataFrame, y: pd.Series, train_size: float = 0.8, random_state: int = 42
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    """
+    split the data to train and test set
+    """
+    return train_test_split(
+        X, y, train_size=train_size, stratify=y, random_state=random_state
+    )
 
 
 def standardize_features(data: pd.DataFrame) -> tuple[pd.DataFrame, StandardScaler]:
