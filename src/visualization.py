@@ -389,7 +389,8 @@ def plot_confusion_matrix(
     plt.ylabel("True Label")
     plt.tight_layout(rect=rect)
     plt.show()
-    
+
+
 def show_classfication_metrics(metrics: dict, model) -> None:
     """
     Display classification metrics in a readable format.
