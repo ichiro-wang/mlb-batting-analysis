@@ -1,5 +1,9 @@
 # MLB Batting Analysis
 
+## CMPT 459 Course Project
+
+By Ichiro Wang and Ajax Mok.
+
 ## Repository Map
 
 - [data](./data)
@@ -27,9 +31,9 @@
 
 ## Data Access Notes
 
+- Raw data file can be found here -> [./data/raw/batting_2015_2024.csv](./data/raw/batting_2015_2024.csv).
 - Source: [https://www.kaggle.com/datasets/beckettnewton/mlb-hitting-pitching-data-2015-2024](https://www.kaggle.com/datasets/beckettnewton/mlb-hitting-pitching-data-2015-2024)
   - Using batting data and ignoring pitching data.
-  - File can be found here -> [./data/raw/batting_2015_2024.csv](./data/raw/batting_2015_2024.csv).
 - Check out the [FanGraphs Library](https://library.fangraphs.com/offense/offensive-statistics-list/) to learn more about the stats provided in the data.
 
 ## How To Run Notebook
@@ -41,7 +45,7 @@ docker build . -t mlb
 docker run -p 8888:8888 mlb
 ```
 
-- Open [http://localhost:8888/tree](http://localhost:8888/tree) on browser to view the notebook.
+- Click the link that appears in the terminal. It should look like [http://127.0.0.1:8888/tree?token=...]()
 
 ### Using Poetry
 
@@ -53,7 +57,8 @@ poetry run ipython kernel install --name "mlb-batting-analysis-env" --user
 poetry run jupyter notebook notebooks/analysis.ipynb
 ```
 
-- Open [http://localhost:8888/tree](http://localhost:8888/tree) on browser to view the notebook.
+- Click the link that appears in the terminal. It should look like [http://127.0.0.1:8888/tree?token=...]()
+- Or, ignore the third command and select the kernel in VSCode to run locally.
 
 ### Using Pip
 
@@ -64,3 +69,5 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+- Run locally via VSCode.

@@ -7,10 +7,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
-from sklearn.metrics import confusion_matrix
-from sklearn.decomposition import PCA
+
+rect = [0, 0, 1, 0.98]
+plot_size = (10, 6)
 
 
 def plot_distributions(
@@ -45,7 +45,7 @@ def plot_distributions(
         ax.set_visible(False)
 
     plt.suptitle(f"{type.title()} of Key Numerical Features", fontsize=16)
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.tight_layout(rect=rect)
     plt.show()
 
 
@@ -74,8 +74,8 @@ def plot_heatmap(data: pd.DataFrame, key_stats: list[str]) -> None:
 
     plt.figure(figsize=(12, 10))
     plt.title("Correlation Heatmap of Key Statistics", pad=10)
-    sns.heatmap(corr_matrix, cmap="vlag", annot=True, fmt=".2f", center=0)
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    sns.heatmap(data=corr_matrix, cmap="vlag", annot=True, fmt=".2f", center=0)
+    plt.tight_layout(rect=rect)
     plt.show()
 
 
@@ -85,11 +85,11 @@ def plot_tier_distribution(data: pd.DataFrame, tier_order: list[str]) -> None:
     """
     print(f"\n{data["Performance Tier"].value_counts()}")
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=plot_size)
     data["Performance Tier"].value_counts().reindex(tier_order).plot(kind="bar")
     plt.title("Performance Tier Distribution", pad=10)
     plt.ylabel("Count")
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.tight_layout(rect=rect)
     plt.show()
 
 
@@ -105,7 +105,7 @@ def plot_pca(
     """
     use scatter plot to visualize PCA
     """
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=plot_size)
 
     if labels is None:
         plt.scatter(
@@ -137,7 +137,7 @@ def plot_pca(
     if contamination is not None:
         title += f" (contamination={contamination})"
     plt.title(title)
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.tight_layout(rect=rect)
     plt.show()
 
 
@@ -152,7 +152,7 @@ def plot_tsne(
     """
     use scatter plot to visualize t-sne
     """
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=plot_size)
 
     if labels is None:
         plt.scatter(
@@ -184,7 +184,7 @@ def plot_tsne(
     plt.xlabel("t-SNE 1")
     plt.ylabel("t-SNE 2")
     plt.title(title)
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.tight_layout(rect=rect)
     plt.show()
 
 
@@ -231,7 +231,7 @@ def plot_scores(
         ax.set_visible(False)
 
     plt.suptitle(f"Scores of Various Feature Selection Methods", fontsize=16)
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.tight_layout(rect=rect)
     plt.show()
 
 
@@ -245,7 +245,7 @@ def plot_clusters(results: dict[str, any], cluster_method: str) -> None:
     cols = 2
     rows = int(np.ceil(len(results) / cols))
 
-    fig, axs = plt.subplots(rows, cols, figsize=(4 * cols, 4 * rows))
+    fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
     axs = axs.ravel()
 
     feat_select_methods = list(results.keys())
@@ -267,7 +267,7 @@ def plot_clusters(results: dict[str, any], cluster_method: str) -> None:
         ax.set_visible(False)
 
     plt.suptitle(f"{cluster_method} Clusterings", fontsize=16)
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.tight_layout(rect=rect)
     plt.show()
 
 
@@ -280,13 +280,13 @@ def plot_dendrograms(results: dict[str, any], **kwargs) -> None:
     cols = 2
     rows = int(np.ceil(len(results) / cols))
 
-    fig, axs = plt.subplots(rows, cols, figsize=(4 * cols, 4 * rows))
+    fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 5 * rows))
     axs = axs.ravel()
 
     feat_select_methods = list(results.keys())
 
     for i, method_name in enumerate(feat_select_methods):
-        model: AgglomerativeClustering = results[method_name]["model"]
+        model = results[method_name]["model"]
         counts = np.zeros(model.children_.shape[0])
         n_samples = len(model.labels_)
         for j, merge in enumerate(model.children_):
@@ -310,7 +310,7 @@ def plot_dendrograms(results: dict[str, any], **kwargs) -> None:
         ax.set_visible(False)
 
     plt.suptitle("Hierarchical Clusterings", fontsize=16)
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.tight_layout(rect=rect)
     plt.show()
 
 
@@ -337,7 +337,7 @@ def plot_cluster_radars(
     rows = int(np.ceil(num_clusters / cols))
 
     fig, axs = plt.subplots(
-        rows, cols, figsize=(4 * cols, 4 * rows), subplot_kw=dict(polar=True)
+        rows, cols, figsize=(5 * cols, 5 * rows), subplot_kw=dict(polar=True)
     )
     axs = axs.ravel()
 
@@ -360,29 +360,32 @@ def plot_cluster_radars(
         axs[j].set_visible(False)
 
     plt.suptitle("Key Stats Within Clusters", fontsize=16)
-    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.tight_layout(rect=rect)
     plt.show()
 
 
 def plot_confusion_matrix(
-    y_test: pd.Series, y_pred: pd.Series, title: str = "Confusion Matrix"
+    cm: np.ndarray,
+    title: str = "Confusion Matrix",
+    tier_names: list[str] = ["Below Average", "Average", "Above Average", "Elite"],
 ) -> None:
     """
     Plots the confusion matrix for classification results.
+
+    :param cm: confusion matrix
     """
-    cm = confusion_matrix(y_test, y_pred)
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=plot_size)
     plt.title(title)
+    sns.heatmap(
+        data=cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        cbar=False,
+        xticklabels=tier_names,
+        yticklabels=tier_names,
+    )
     plt.xlabel("Predicted Label")
     plt.ylabel("True Label")
-    plt.tight_layout()
+    plt.tight_layout(rect=rect)
     plt.show()
-
-
-def show_classfication_metrics(metrics: dict, model) -> None:
-    """
-    Display classification metrics in a readable format.
-    """
-    print(f"\n{model} Metrics:")
-    for metric, value in metrics.items():
-        print(f"{metric}: {value:.4f}")

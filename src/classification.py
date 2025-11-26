@@ -11,6 +11,7 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     f1_score,
+    confusion_matrix,
 )
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
@@ -55,3 +56,19 @@ def evaluate_xgboost(
     random_state: int = 42,
 ):
     pass
+
+
+def show_classfication_metrics(metrics: dict[str, any], model: str) -> None:
+    """
+    Display classification metrics in a readable format.
+    """
+    print(f"\n{model} Metrics:")
+    for metric, value in metrics.items():
+        print(f"{metric}: {value:.4f}")
+
+
+def create_confusion_matrix(y_test: pd.Series, y_pred: pd.Series) -> np.ndarray:
+    """
+    create a confusion matrix
+    """
+    return confusion_matrix(y_test, y_pred)
