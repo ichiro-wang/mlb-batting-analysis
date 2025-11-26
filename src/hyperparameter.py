@@ -5,6 +5,7 @@ Description: Apply hyperparameter tuning on models
 
 import pandas as pd
 import numpy as np
+import xgboost as xgb
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
@@ -72,8 +73,17 @@ def random_search_rf(
         "CV_mean_accuracy": best_score,
     }
 
-    return (
-        best_model,
-        tuned_metrics,
-        y_pred_tuned,
-    )
+    return best_model, tuned_metrics, y_pred_tuned
+
+
+def random_search_xgb(
+    xgb: xgb.XGBModel,
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
+    y_train: pd.Series,
+    y_test: pd.Series,
+    n_iter: int = 50,
+    n_splits: int = 5,
+    random_state: int = 42,
+):
+    pass

@@ -60,7 +60,7 @@ poetry run jupyter notebook notebooks/analysis.ipynb
 ```
 
 - Click the link that appears in the terminal. It should look like [http://127.0.0.1:8888/tree?token=...]()
-- Or, ignore the third command and select the kernel in VSCode to run locally.
+- Or, ignore the third command and run locally via VSCode.
 
 ### Using Pip
 
