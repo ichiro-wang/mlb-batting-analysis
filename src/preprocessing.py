@@ -1,15 +1,11 @@
 """
 File: preprocessing.py
-Description: Helper functions for preprocessing data
+Description: Functions for preprocessing data
 """
 
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-from imblearn.over_sampling import SMOTE
 
 
 def remove_duplicate_columns(
@@ -66,6 +62,23 @@ def rename_column(
     return data
 
 
+def convert_sb_cs_rate(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    instead of counting SB and CS, we convert it to a rate to check efficiency
+
+    SB% = SB / (SB + CS)
+
+    This approach aligns with the project's philosophy of using rate stats instead of counting stats
+    """
+    data = data.copy()
+
+    data["SB%"] = data["SB"] / (data["SB"] + data["CS"])
+    data["SB%"] = data["SB%"].fillna(0)
+    data = data.drop(columns=["SB", "CS"])
+
+    return data
+
+
 def filter_by_threshold(
     data: pd.DataFrame, column: str, threshold: int | float, direction: str = "ge"
 ) -> pd.DataFrame:
@@ -87,7 +100,7 @@ def filter_by_threshold(
     return data
 
 
-def add_performance_tiers(data: pd.DataFrame) -> pd.DataFrame:
+def create_performance_tiers(data: pd.DataFrame) -> pd.DataFrame:
     """
     classify players into tiers based on wRC+
 
@@ -172,17 +185,6 @@ def fix_team_values(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
-def create_train_test_split(
-    X: pd.DataFrame, y: pd.Series, train_size: float = 0.8, random_state: int = 42
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-    """
-    split the data to train and test set
-    """
-    return train_test_split(
-        X, y, train_size=train_size, stratify=y, random_state=random_state
-    )
-
-
 def standardize_features(data: pd.DataFrame) -> tuple[pd.DataFrame, StandardScaler]:
     """
     standardize numerical features using sklearn standard scaler
@@ -202,76 +204,20 @@ def inverse_standardized_features(
     data: pd.DataFrame, scaler: StandardScaler
 ) -> pd.DataFrame:
     """
-    scale back to original data
+    scale back to original data after standardization
+
+    ensure data is in the same dimensions as it was when standardized
     """
     data = scaler.inverse_transform(data)
     return data
 
 
-def apply_smote(
-    X: pd.DataFrame, y: pd.Series, random_state: int = 42
-) -> tuple[pd.DataFrame, pd.Series, SMOTE]:
+def apply_one_hot_encoding(
+    data: pd.DataFrame, columns: list[str], prefix: str = None, drop_first: bool = True
+) -> pd.DataFrame:
     """
-    generate synthetic samples to deal with class imbalance
+    apply one-hot encoding to data
     """
-    sm = SMOTE(random_state=random_state)
-
-    X_resampled, y_resampled = sm.fit_resample(X, y)
-
-    resampled_counts = y_resampled.value_counts()
-    print(f"\nClass distribution of training set after SMOTE:")
-    print(resampled_counts)
-
-    return X_resampled, y_resampled, sm
-
-
-def apply_pca(data: pd.DataFrame, n_components: int = 2) -> tuple[np.ndarray, PCA]:
-    """
-    apply PCA to reduce dimensions
-    """
-    pca = PCA(n_components=n_components)
-    pca_result = pca.fit_transform(data)
-
-    print(f"PC1 explains {pca.explained_variance_ratio_[0]:.2%} of the data")
-    print(f"PC2 explains {pca.explained_variance_ratio_[1]:.2%} of the data")
-    print(
-        f"Combined, they explain: {np.cumsum(pca.explained_variance_ratio_)[1]:.2%} of all data variation."
+    return pd.get_dummies(
+        data=data, columns=columns, prefix=prefix, drop_first=drop_first
     )
-
-    return pca_result, pca
-
-
-def apply_tsne(
-    data: pd.DataFrame, n_components: int = 2, random_state: int = 42
-) -> tuple[np.ndarray, TSNE]:
-    """
-    apply t-SNE
-    """
-    tsne = TSNE(n_components=n_components, random_state=random_state)
-    tsne_result = tsne.fit_transform(data)
-
-    return tsne_result, tsne
-
-
-def check_correlations(data: pd.DataFrame, features: list[str]) -> pd.DataFrame:
-    """
-    given a list of features, return their correlation matrix
-    """
-    return data[features].corr()
-
-
-def convert_sb_cs_rate(data: pd.DataFrame) -> pd.DataFrame:
-    """
-    instead of counting SB and CS, we convert it to a rate to check efficiency
-
-    SB% = SB / (SB + CS)
-
-    This approach aligns with the project's philosophy of using rate stats instead of counting stats
-    """
-    data = data.copy()
-
-    data["SB%"] = data["SB"] / (data["SB"] + data["CS"])
-    data["SB%"] = data["SB%"].fillna(0)
-    data = data.drop(columns=["SB", "CS"])
-
-    return data

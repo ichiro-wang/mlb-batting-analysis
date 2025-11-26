@@ -7,8 +7,8 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFECV
-from sklearn.model_selection import StratifiedKFold
 from sklearn.linear_model import LogisticRegressionCV
+from src.validation import create_stratified_kfolds
 
 
 def remove_stats(data: pd.DataFrame) -> pd.DataFrame:
@@ -116,15 +116,13 @@ def apply_rfecv(
     """
 
     # use a stratified n_splits strategy
-    cv_split = StratifiedKFold(
-        n_splits=n_splits, shuffle=True, random_state=random_state
-    )
+    cv = create_stratified_kfolds(n_splits=n_splits, random_state=random_state)
     rf = RandomForestClassifier(random_state=random_state)
 
     rfecv = RFECV(
         estimator=rf,
         step=step_size,  # adjust step to increase/decrease speed
-        cv=cv_split,
+        cv=cv,
         scoring="accuracy",
         n_jobs=-1,
     )
@@ -150,13 +148,11 @@ def apply_lasso(
     L1-penalized Logistic Regression (LASSO-like) for classification feature selection.
     """
 
-    cv_split = StratifiedKFold(
-        n_splits=n_splits, shuffle=True, random_state=random_state
-    )
+    cv = create_stratified_kfolds(n_splits=n_splits, random_state=random_state)
 
     lrcv = LogisticRegressionCV(
         Cs=Cs,
-        cv=cv_split,
+        cv=cv,
         penalty="l1",
         solver="saga",
         multi_class="ovr",
