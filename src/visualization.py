@@ -366,8 +366,8 @@ def plot_cluster_radars(
 
 def plot_confusion_matrix(
     cm: np.ndarray,
+    label_order: list[str],
     title: str = "Confusion Matrix",
-    tier_names: list[str] = ["Below Average", "Average", "Above Average", "Elite"],
 ) -> None:
     """
     Plots the confusion matrix for classification results.
@@ -382,19 +382,10 @@ def plot_confusion_matrix(
         fmt="d",
         cmap="Blues",
         cbar=False,
-        xticklabels=tier_names,
-        yticklabels=tier_names,
+        xticklabels=label_order,
+        yticklabels=label_order,
     )
     plt.xlabel("Predicted Label")
     plt.ylabel("True Label")
     plt.tight_layout(rect=rect)
     plt.show()
-
-
-def show_classfication_metrics(metrics: dict, model) -> None:
-    """
-    Display classification metrics in a readable format.
-    """
-    print(f"\n{model} Metrics:")
-    for metric, value in metrics.items():
-        print(f"{metric}: {value:.4f}")
