@@ -5,11 +5,17 @@ Description: Apply hyperparameter tuning on models
 
 import pandas as pd
 import numpy as np
+from typing import Literal
 from xgboost import XGBClassifier
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
-from src.shared import create_stratified_kfolds, calculate_metrics
+from src.shared import (
+    create_stratified_kfolds,
+    create_confusion_matrix,
+    calculate_metrics,
+    show_metrics,
+)
 
 
 def random_search(
@@ -30,9 +36,9 @@ def random_search(
     if isinstance(classifier, RandomForestClassifier):
         param_dists = {
             "n_estimators": np.arange(200, 600, 50),
-            "max_depth": np.concatenate([
-                np.arange(5, 16, 5), np.arange(20, 51, 10), np.array([None])
-            ]),
+            "max_depth": np.concatenate(
+                [np.arange(5, 16, 5), np.arange(20, 51, 10), np.array([None])]
+            ),
             "min_samples_split": np.arange(5, 21, 5),
             "min_samples_leaf": np.concatenate([np.array([1]), np.arange(2, 9, 2)]),
             "max_features": np.array(["sqrt", "log2", None]),
@@ -43,16 +49,16 @@ def random_search(
     elif isinstance(classifier, XGBClassifier):
         param_dists = {
             "learning_rate": np.arange(0.05, 0.31, 0.05),
-            "max_depth": np.concatenate([
-                np.arange(2, 7), np.arange(8, 13, 2), np.array([15])
-            ]),
+            "max_depth": np.concatenate(
+                [np.arange(2, 7), np.arange(8, 13, 2), np.array([15])]
+            ),
             "min_child_weight": np.arange(1, 8, 2),
             "gamma": np.arange(0, 0.5, 0.1),
             "colsample_bytree": np.concatenate([np.arange(0.3, 0.6), np.array([0.7])]),
         }
 
         model_name = "XGBoost"
-        
+
         le = LabelEncoder()
         y_train = le.fit_transform(y_train)
 
@@ -80,14 +86,14 @@ def random_search(
     best_score = random_search.best_score_
 
     print(f"\nRandom Search Results on {model_name}")
-    print("Best CV Accuracy:", best_score)
+    print(f"Best CV Accuracy: {best_score:.4f}")
     print("Best Parameters:")
     for name, val in best_params.items():
-        print(f"{name}: {val}")
+        print(f"\t{name}: {val}")
 
     # Predictions using tuned model
     y_pred_tuned = best_model.predict(X_test)
-    
+
     if isinstance(classifier, XGBClassifier):
         y_pred_tuned = le.inverse_transform(y_pred_tuned)
 
@@ -95,3 +101,43 @@ def random_search(
     tuned_metrics = calculate_metrics(y_test=y_test, y_pred=y_pred_tuned)
 
     return best_model, tuned_metrics, y_pred_tuned
+
+
+def tune_and_evaluate_models(
+    classifier_type: Literal["rf", "xgb"],
+    results: dict[str, any],
+    datasets: dict[str, dict[str, pd.DataFrame]],
+    label_order: list[str],
+) -> dict[str, dict[str, any]]:
+
+    if classifier_type not in ("rf", "xgb"):
+        raise ValueError(f"Unsupported classifier: {classifier_type}")
+
+    tuned_res = {}
+
+    for name, res in results.items():
+        X_train, X_test = datasets[name]["X_train"], datasets[name]["X_test"]
+        y_train, y_test = datasets[name]["y_train"], datasets[name]["y_test"]
+        classifier = res["model"]
+
+        model_name = "Random Forest" if classifier_type == "rf" else "XGBoost"
+        print(f"\n{model_name} ({name})")
+
+        model, metrics, y_pred = random_search(
+            classifier=classifier,
+            X_train=X_train,
+            X_test=X_test,
+            y_train=y_train,
+            y_test=y_test,
+        )
+
+        title = f"Tuned {model_name} metrics ({name})"
+        show_metrics(metrics=metrics, title=title)
+
+        cm = create_confusion_matrix(
+            y_test=y_test, y_pred=y_pred, label_order=label_order
+        )
+
+        tuned_res[name] = {"model": model, "cm": cm, "y_pred": y_pred}
+
+    return tuned_res

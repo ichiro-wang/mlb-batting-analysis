@@ -8,10 +8,14 @@ import numpy as np
 import xgboost as xgb
 from typing import Literal
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
-from src.shared import create_stratified_kfolds, calculate_metrics
+from src.shared import (
+    create_stratified_kfolds,
+    create_confusion_matrix,
+    calculate_metrics,
+    show_metrics,
+)
 
 
 def evaluate_random_forest(
@@ -56,7 +60,6 @@ def evaluate_xgboost(
     """
     le = LabelEncoder()
     y_train_encoded = le.fit_transform(y_train)
-    y_test_encoded = le.transform(y_test)
 
     dtrain = xgb.DMatrix(data=X_train, label=y_train_encoded)
 
@@ -83,15 +86,13 @@ def evaluate_xgboost(
     # find the best iteration after cross-val: the one with least test logloss
     best_iteration = cv_res["test-mlogloss-mean"].argmin()
 
-    # model = xgb.train(params=params, dtrain=dtrain, num_boost_round=best_iteration + 1)
-
     model = xgb.XGBClassifier(
         n_estimators=best_iteration + 1,
         objective="multi:softmax",
         eval_metric="mlogloss",
         num_class=len(y_train.unique()),
         random_state=random_state,
-        n_jobs=-1
+        n_jobs=-1,
     )
 
     model.fit(X_train, y_train_encoded)
@@ -103,21 +104,38 @@ def evaluate_xgboost(
     return model, metrics, y_pred
 
 
-def show_classfication_metrics(metrics: dict[str, any], title: str) -> None:
-    """
-    Display classification metrics in a readable format.
-    """
-    print(f"\n{title}:")
-    for metric, value in metrics.items():
-        print(f"{metric}: {value:.4f}")
-
-
-def create_confusion_matrix(
-    y_test: pd.Series,
-    y_pred: pd.Series,
+def train_and_evaluate_models(
+    classifier_type: Literal["rf", "xgb"],
+    datasets: dict[str, dict[str, pd.DataFrame]],
     label_order: list[str],
-) -> np.ndarray:
-    """
-    create a confusion matrix
-    """
-    return confusion_matrix(y_test, y_pred, labels=label_order)
+) -> dict[str, dict[str, any]]:
+    res = {}
+
+    for name, dataset in datasets.items():
+        X_train, X_test = dataset["X_train"], dataset["X_test"]
+        y_train, y_test = dataset["y_train"], dataset["y_test"]
+
+        if classifier_type == "rf":
+            model, metrics, y_pred = evaluate_random_forest(
+                X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test
+            )
+            title = f"Random Forest metrics ({name})"
+
+        elif classifier_type == "xgb":
+            model, metrics, y_pred = evaluate_xgboost(
+                X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test
+            )
+            title = f"XGBoost metrics ({name})"
+
+        else:
+            raise ValueError(f"Unsupported classifier: {classifier_type}")
+
+        show_metrics(metrics=metrics, title=title)
+
+        cm = create_confusion_matrix(
+            y_test=y_test, y_pred=y_pred, label_order=label_order
+        )
+
+        res[name] = {"model": model, "cm": cm, "y_pred": y_pred}
+
+    return res
