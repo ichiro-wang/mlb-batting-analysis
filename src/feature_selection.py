@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFECV
 from sklearn.linear_model import LogisticRegressionCV
-from src.validation import create_stratified_kfolds
+from src.shared import create_stratified_kfolds
 
 
 def remove_stats(data: pd.DataFrame) -> pd.DataFrame:

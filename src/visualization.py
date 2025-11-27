@@ -197,7 +197,7 @@ def plot_scores(
 
     subplots for visual comparison
     """
-    include_inertia = "inertias" in results["None"]
+    include_inertia = "inertias" in results["RFE"]
 
     cols = 2
     rows = int(np.ceil(len(results) / cols) * (2 if include_inertia else 1))
@@ -266,7 +266,10 @@ def plot_clusters(results: dict[str, any], cluster_method: str) -> None:
     for ax in axs[len(results) :]:
         ax.set_visible(False)
 
-    plt.suptitle(f"{cluster_method} Clusterings", fontsize=16)
+    plt.suptitle(
+        f"{cluster_method} Clusterings of Various Feature Selection Methods",
+        fontsize=16,
+    )
     plt.tight_layout(rect=rect)
     plt.show()
 
@@ -309,7 +312,9 @@ def plot_dendrograms(results: dict[str, any], **kwargs) -> None:
     for ax in axs[len(results) :]:
         ax.set_visible(False)
 
-    plt.suptitle("Hierarchical Clusterings", fontsize=16)
+    plt.suptitle(
+        "Hierarchical Clusterings of Various Feature Selection Methods", fontsize=16
+    )
     plt.tight_layout(rect=rect)
     plt.show()
 
@@ -321,6 +326,7 @@ def plot_cluster_radars(
     plotting stats within clusters to spot potential patterns
     """
     cluster_summary = data.groupby(labels)[stats].mean()
+    cluster_counts = pd.Series(labels).value_counts()
 
     global_min = cluster_summary.min().min()
     global_max = cluster_summary.max().max()
@@ -354,7 +360,9 @@ def plot_cluster_radars(
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(stats)
         ax.set_ylim(global_min, global_max)
-        ax.set_title(f"Cluster {cluster}")
+
+        count = cluster_counts[cluster]
+        ax.set_title(f"Cluster {cluster} (n={count})")
 
     for j in range(i + 1, len(axs)):
         axs[j].set_visible(False)
@@ -364,28 +372,49 @@ def plot_cluster_radars(
     plt.show()
 
 
-def plot_confusion_matrix(
-    cm: np.ndarray,
+def plot_confusion_matrices(
+    results: dict[str, any],
     label_order: list[str],
-    title: str = "Confusion Matrix",
+    model_name: str,
 ) -> None:
     """
-    Plots the confusion matrix for classification results.
-
-    :param cm: confusion matrix
+    Plots the confusion matrices for classification results.
     """
-    plt.figure(figsize=plot_size)
-    plt.title(title)
-    sns.heatmap(
-        data=cm,
-        annot=True,
-        fmt="d",
-        cmap="Blues",
-        cbar=False,
-        xticklabels=label_order,
-        yticklabels=label_order,
+    label_order = [label.replace(" ", "\n") for label in label_order]
+
+    cols = 2
+    rows = int(np.ceil(len(results) / cols))
+
+    fig, axs = plt.subplots(rows, cols, figsize=(5 * cols, 4 * rows))
+    axs = axs.ravel()
+
+    feat_select_methods = list(results.keys())
+
+    for i, method_name in enumerate(feat_select_methods):
+        ax = axs[i]
+        cm = results[method_name]["cm"]
+
+        sns.heatmap(
+            data=cm,
+            annot=True,
+            fmt="d",
+            cmap="Blues",
+            cbar=False,
+            xticklabels=label_order,
+            yticklabels=label_order,
+            ax=ax,
+        )
+        title = f"{model_name} Confusion Matrix ({method_name})"
+        ax.set_title(title)
+        ax.set_xlabel("Predicted Label")
+        ax.set_ylabel("True Label")
+
+    for ax in axs[len(results) :]:
+        ax.set_visible(False)
+
+    plt.suptitle(
+        f"{model_name} Confusion Matrices of Various Feature Selection Methods",
+        fontsize=16,
     )
-    plt.xlabel("Predicted Label")
-    plt.ylabel("True Label")
     plt.tight_layout(rect=rect)
     plt.show()
