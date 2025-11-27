@@ -23,7 +23,7 @@ By Ichiro Wang and Ajax Mok.
   - [model_utils.py](./src/model_utils.py)
   - [outlier_detection.py](./src/outlier_detection.py)
   - [preprocessing.py](./src/preprocessing.py)
-  - [validation.py](./src/validation.py)
+  - [shared.py](./src/shared.py)
   - [visualization.py](./src/visualization.py)
 - [Dockerfile](./Dockerfile)
 - [poetry.lock](./poetry.lock)
@@ -38,7 +38,9 @@ By Ichiro Wang and Ajax Mok.
   - Using batting data and ignoring pitching data.
 - Check out the [FanGraphs Library](https://library.fangraphs.com/offense/offensive-statistics-list/) to learn more about the stats provided in the data.
 
-## How To Run Notebook
+## How To Run the Notebook
+
+- Notebook can be found at [./notebooks/analysis.ipynb](./notebooks/analysis.ipynb)
 
 ### Using Docker
 
@@ -50,8 +52,6 @@ docker run -p 8888:8888 mlb
 - Click the link that appears in the terminal. It should look like [http://127.0.0.1:8888/tree?token=...]()
 
 ### Using Poetry
-
-- Install poetry [here](https://python-poetry.org/).
 
 ```bash
 poetry install --no-root
