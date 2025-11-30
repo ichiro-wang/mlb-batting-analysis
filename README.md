@@ -64,7 +64,7 @@ poetry run jupyter notebook notebooks/analysis.ipynb
 
 ### Using Pip
 
-- See [requirements.txt](./requirements..txt)
+- See [requirements.txt](./requirements.txt)
 
 ```bash
 python3 -m venv .venv
