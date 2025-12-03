@@ -4,7 +4,7 @@
 
 By Ichiro Wang and Ajax Mok.
 
-- Notebook found [here](./notebooks/analysis.ipynb)
+- Notebook found [here](./notebooks/analysis.ipynb).
 - Project report found [here](./project-report.pdf), however, we recommend checking the notebook for more insight.
 
 ## Repository Map
@@ -44,6 +44,8 @@ By Ichiro Wang and Ajax Mok.
 ## How To Run the Notebook
 
 ### Using Docker
+
+- Probably the most straightforward method.
 
 ```bash
 docker build . -t mlb
