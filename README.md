@@ -4,6 +4,9 @@
 
 By Ichiro Wang and Ajax Mok.
 
+- Notebook found [here](./notebooks/analysis.ipynb)
+- Project report found [here](./project-report.pdf), however, we recommend checking the notebook for more insight.
+
 ## Repository Map
 
 - [data](./data)
@@ -39,8 +42,6 @@ By Ichiro Wang and Ajax Mok.
 - Check out the [FanGraphs Library](https://library.fangraphs.com/offense/offensive-statistics-list/) to learn more about the stats provided in the data.
 
 ## How To Run the Notebook
-
-- Notebook can be found at [./notebooks/analysis.ipynb](./notebooks/analysis.ipynb)
 
 ### Using Docker
 
